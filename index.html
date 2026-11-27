@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
-<title>AulaDoc v0.6.6</title>
+<title>AulaDoc v0.6.6.1</title>
 <link rel="icon" type="image/png" href="icons/favicon-32.png">
 <style>
 :root{--bg:#f6f8fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--primary:#0f172a;--primary2:#1e293b;--ok:#dcfce7;--warn:#fef3c7;--bad:#fee2e2;--shadow:0 10px 30px rgba(15,23,42,.06)}
@@ -33,7 +33,7 @@ input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);
 @media(min-width:760px){main,.topbar{padding-left:28px;padding-right:28px}.grid{grid-template-columns:repeat(5,minmax(0,1fr))}.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:600px){.topbar{align-items:flex-start}.top-actions{justify-content:flex-end}.brand{font-size:20px}.brand-icon{width:42px;height:42px}.grid{grid-template-columns:1fr 1fr}.actions{width:100%;justify-content:flex-end}.item{align-items:flex-start;flex-wrap:wrap}.bottom-actions{flex-direction:column;align-items:stretch}}
 
-/* v0.6.6: adaptive UI */
+/* v0.6.6.1: adaptive UI */
 .empty-state{padding:30px 18px;text-align:center;display:grid;justify-items:center;gap:9px;color:var(--muted)}
 .empty-state .empty-icon{width:58px;height:58px;border-radius:18px;background:#f1f5f9;display:grid;place-items:center;font-size:26px}
 .empty-state h3{color:var(--text);margin:2px 0 0}.empty-state p{max-width:380px;margin:0;font-size:13px;line-height:1.5}
@@ -49,7 +49,7 @@ input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);
 <body>
 <div class="app">
 <header class="topbar">
-<div class="brand-wrap"><svg class="brand-icon" viewBox="0 0 64 64" aria-label="AulaDoc"><rect width="64" height="64" rx="12" fill="#0f172a"/><path d="M15 17h15v31H15zM34 17h15v31H34z" fill="#fff"/><path d="M20 25h6m-6 7h6m12-7h6m-6 7h6" stroke="#64748b" stroke-width="2"/></svg><div><div class="brand">AulaDoc</div><div class="muted">Prof. Perez P. · v0.6.6</div></div></div>
+<div class="brand-wrap"><svg class="brand-icon" viewBox="0 0 64 64" aria-label="AulaDoc"><rect width="64" height="64" rx="12" fill="#0f172a"/><path d="M15 17h15v31H15zM34 17h15v31H34z" fill="#fff"/><path d="M20 25h6m-6 7h6m12-7h6m-6 7h6" stroke="#64748b" stroke-width="2"/></svg><div><div class="brand">AulaDoc</div><div class="muted">Prof. Perez P. · v0.6.6.1</div></div></div>
 <div class="top-actions"><button class="btn ghost" id="btnBackup">Backup</button><button class="btn ghost" id="btnRestore">Restaurar</button><input type="file" id="restoreFile" accept=".json" hidden></div>
 </header>
 <main id="appView"></main>
@@ -246,8 +246,7 @@ function eventICS(e){const clean=v=>String(v||'').replace(/[\r\n]/g,' ').replace
 function allAlerts(){const old={...ctx},d=db();let rows=[];try{for(const sub of d.subjects){ctx.subjectId=sub.id;ctx.institutionId=sub.institutionId;for(const a of calculateSubjectAlerts())rows.push({...a,subject:sub.name,inst:d.institutions.find(i=>i.id===sub.institutionId)?.name||''})}}finally{Object.assign(ctx,old)}setView(btn('← Inicio','home')+'<h2>Centro general de alertas</h2><div class="card">'+(rows.map(a=>'<div class="item"><div class="grow"><b>'+esc(a.student)+'</b><div class="meta">'+esc(a.inst+' · '+a.subject)+'</div><span class="alert-chip '+(a.level==='danger'?'alert-danger':'alert-warn')+'">'+esc(a.message)+'</span></div></div>').join('')||'Sin alertas académicas')+'</div>')}
 const tableHeaders={students:['Nombre','Legajo'],grades:['Alumno','Evaluación','Nota'],attendance:['Fecha','Alumno','Estado'],topics:['Fecha','Clase','Contenido','Actividades']};
 function tableData(k){const st=subjectStudents(),nm=id=>st.find(x=>x.id===id)?.name||id;let rows=moduleRows(k);return [tableHeaders[k],...(k==='students'?st.map(x=>[x.name,x.legajo]):k==='grades'?rows.map(x=>[nm(x.studentId),x.eval,x.value]):k==='attendance'?rows.flatMap(x=>Object.entries(x.attendance).map(([id,v])=>[x.date,nm(id),v])):rows.map(x=>[x.date,x.number,x.content,x.activities]))]}
-function csvSave(name,rows){const cell=v=>'"'+String(v??'').replace(/^[=+@-]/,"'home();
-</script>").replace(/"/g,'""')+'"';download(name,'\ufeff'+rows.map(r=>r.map(cell).join(';')).join('\r\n'))}
+function csvSave(name,rows){const cell=v=>'"'+String(v??'').replace(/^[=+@-]/,m=>"'"+m).replace(/"/g,'""')+'"';download(name,'\ufeff'+rows.map(r=>r.map(cell).join(';')).join('\r\n'))}
 function templateExport(k){csvSave('Plantilla-'+k+'.csv',[tableHeaders[k]])}
 function tableExport(k){modal('Exportar informe','<div class="field"><label>Formato</label><select name="format"><option value="xlsx">Excel (.xlsx)</option><option value="csv">CSV</option><option value="pdf">PDF / imprimir</option></select></div>',f=>{const rows=tableData(k),fmt=f.get('format');if(fmt==='csv')csvSave(k+'.csv',rows);else if(fmt==='xlsx'){if(!window.XLSX)return toast('Biblioteca Excel no disponible. Probá CSV.');const w=XLSX.utils.book_new();XLSX.utils.book_append_sheet(w,XLSX.utils.aoa_to_sheet(rows),k);XLSX.writeFile(w,k+'.xlsx')}else{const w=window.open('','_blank');if(!w)return toast('Permití ventanas emergentes');w.document.write('<html><head><title>Informe AulaDoc</title><style>body{font:14px Arial}table{border-collapse:collapse;width:100%}td,th{border:1px solid #aaa;padding:6px}th{background:#eee}</style></head><body><h1>'+esc(institution()?.name||'')+'</h1><h2>'+esc(subject()?.name||'')+' — '+esc(k)+'</h2><p>Prof. Perez P.</p><table>'+rows.map((r,i)=>'<tr>'+r.map(v=>'<'+(i?'td':'th')+'>'+esc(String(v??''))+'</'+(i?'td':'th')+'>').join('')+'</tr>').join('')+'</table></body></html>');w.document.close();w.print()}$('#modalRoot').innerHTML=''})}
 function tableImport(k){const sid=ctx.subjectId;modal('Importar · Paso 1 de 3','<p>Seleccioná Excel o CSV con encabezados en la primera fila.</p><input id="tableFile" type="file" accept=".xlsx,.csv" required>',async()=>{try{const f=$('#tableFile').files[0];if(!f||f.size>5000000)throw Error('Archivo inválido o mayor a 5 MB');if(!window.XLSX)throw Error('Biblioteca Excel no disponible');const w=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:false});const rows=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1,defval:'',raw:false});if(rows.length<2||rows.length>10001)throw Error('Archivo vacío o demasiado extenso');const h=rows.shift();modal('Importar · Paso 2 de 3','<p>Relacioná las columnas.</p>'+tableHeaders[k].map((n,i)=>'<div class="field"><label>'+esc(n)+'</label><select name="c'+i+'"><option value="-1">No asignada</option>'+h.map((v,j)=>'<option value="'+j+'" '+(String(v).trim().toLowerCase()===n.toLowerCase()?'selected':'')+'>'+esc(String(v))+'</option>').join('')+'</select></div>').join(''),form=>{const ix=tableHeaders[k].map((_,i)=>Number(form.get('c'+i)));const mapped=rows.filter(r=>r.some(v=>String(v).trim())).map(r=>ix.map(i=>i<0?'':String(r[i]??'').trim()));tablePreview(k,sid,mapped)})}catch(e){toast(e.message)}})}
